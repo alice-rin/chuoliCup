@@ -1,1 +1,4 @@
 # 测试添加一个文件，这里面怎么添加文件夹。。
+# 每次写代码前，git pull
+# 本地操作后，推送到git仓库，git pull拉取后git push，注意处理merge conflict
+# 提交时说明主要修改工作
