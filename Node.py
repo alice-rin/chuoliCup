@@ -115,8 +115,9 @@ class RedStrikeVehicleNode(Node):
 
 class TargetNode(Node):
     def __init__(self, temp_id: str, position: Position, missile_capacity, size: float, price,
-                 threat_level, defense_level, expose_duration, expose_time_start):
+                 threat_level, defense_level, expose_duration, expose_time_start, name):
         super().__init__(temp_id, position, Affiliation.BLUE, NodeType.Target)
+        self.name: str = name
         self.size = size
         self.price: int = price
         self.missile_capacity = missile_capacity
@@ -146,23 +147,23 @@ class TargetNode(Node):
 
 
 class XF_launcher(TargetNode):
-    def __init__(self, id: str, position:Position, expose_time_start:float):
+    def __init__(self, id: str, position:Position, expose_time_start:float, remain_time, name: str):
         super().__init__(id, position, missile_capacity=16, size=3.0, price=80, threat_level=1, defense_level=1,
-                         expose_duration=20 * 60, expose_time_start=expose_time_start)
+                         expose_duration=remain_time, expose_time_start=expose_time_start, name=name)
         self.damage_requirement = 400.0
 
 
 class JBL_launcher(TargetNode):
-    def __init__(self, id: str, position:Position, expose_time_start:float):
+    def __init__(self, id: str, position:Position, expose_time_start:float, remain_time, name: str):
         super().__init__(id, position, missile_capacity=8, size=6.0, price=110, threat_level=2, defense_level=2,
-                         expose_duration=15 * 60, expose_time_start=expose_time_start)
+                         expose_duration=remain_time, expose_time_start=expose_time_start, name=name)
         self.damage_requirement = 200.0
 
 
 class YC_launcher(TargetNode):
-    def __init__(self, id: str, position:Position, expose_time_start:float):
+    def __init__(self, id: str, position:Position, expose_time_start:float, remain_time, name: str):
         super().__init__(id, position, missile_capacity=10, size=2.0, price=100, threat_level=3, defense_level=2,
-                         expose_duration=10 * 60, expose_time_start=expose_time_start)
+                         expose_duration=remain_time, expose_time_start=expose_time_start, name=name)
         self.damage_requirement = 200.0
 
 

@@ -66,6 +66,9 @@ def upload_file():
     cols = ['序号'] + [col for col in cols if col != '序号']
     df = df[cols]
 
+    scenario_generator = ScenarioGenerator()
+    scenario_generator.create_from_file(df)
+
     # 转换为HTML表格
     table_html = df.to_html(
         classes='table table-striped table-bordered table-hover',
