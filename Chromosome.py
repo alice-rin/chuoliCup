@@ -44,12 +44,14 @@ class Chromosome:
         target.feasible_fire_action_list.clear()
         for temp_fire_node in self.red_launcher_list:
             temp_fire_action = FireAction(target, temp_fire_node, 0, 0)
-            if temp_fire_action.check_feasiblility_step_1() and temp_fire_action.cal_launch_time():
+            if temp_fire_action.check_feasibility_step_1() and temp_fire_action.cal_launch_time():
                 temp_fire_action.assign_missile_num_by_damage_and_penetration()
                 if temp_fire_action.check_is_missile_number_required_meet():
-                    target.feasible_fire_action_list.append((temp_fire_action))
+                    target.feasible_fire_action_list.append(temp_fire_action)
                 else:
                     continue
+            # else:
+
 
     def print_chromosome(self):
         for target in self.blue_target_list:

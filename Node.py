@@ -181,11 +181,16 @@ class FireAction:
         self.required_penetration_missile_num = 0
         self.cal_required_penetration_missile_num()
 
+        # 首先移动发射车辆的位置至离目标点最近的发射位置
+        temp_coord, temp_distance = BasicGeometryFunc.find_closet_coord_and_distance(self.red_launcher_node.area.generate_area_pos_list(), self.target_node.position)
+
+        self.red_launcher_node.position = temp_coord
+
         self.node_distance = BasicGeometryFunc.cal_distance_from_to_node(self.target_node.position,
                                                                          self.red_launcher_node.position)
         self.missile_fly_duration = self.node_distance / self.red_launcher_node.missile.avg_speed
 
-    def check_feasiblility_step_1(self)->bool:
+    def check_feasibility_step_1(self)->bool:
         if not self.red_launcher_node.missile.shoot_range_min <= self.node_distance <= self.red_launcher_node.missile.shoot_range_max:
             return False
 
@@ -220,7 +225,7 @@ class FireAction:
             self.red_launcher_node.missile.penetration_rate - self.target_node.penetration_penalty))
 
     def cal_feasibility(self)->bool:
-        if self.check_feasiblility_step_1():
+        if self.check_feasibility_step_1():
             return False
 
         if self.launch_time < self.red_launcher_node.actual_ready_time:
