@@ -42,7 +42,7 @@ def parse_txt_to_dataframe(file_path):
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('start.html')
+    return render_template('home.html')
 
 
 @app.route('/upload', methods=['POST'])
@@ -61,16 +61,10 @@ def upload_file():
 
     # 解析文件
     df = parse_txt_to_dataframe(filename)
-    # 设置列宽
-    column_widths = {}
-    for col in df.columns:
-        if df[col].dtype == 'object':
-            # 计算最大文本长度
-            max_length = df[col].str.len().max()
-
-            if max_length < 10:
-                column_widths[col] = '5%'
-
+    df['序号'] = range(1, len(df) + 1)
+    cols = df.columns.tolist()
+    cols = ['序号'] + [col for col in cols if col != '序号']
+    df = df[cols]
 
     # 转换为HTML表格
     table_html = df.to_html(
@@ -79,12 +73,16 @@ def upload_file():
         index=False
     )
 
-    return jsonify({
+    data = {
+        'filename': filename,
         'table_html': table_html,
-        'column_widths': column_widths,
+        'headers': df.columns.tolist(),
+        'rows': df.values.tolist(),
         'total_rows': len(df),
         'total_columns': len(df.columns)
-    })
+    }
+
+    return jsonify({'success': True, 'data': data})
 
 if __name__ == "__main__":
     con = configparser.ConfigParser()
