@@ -1,9 +1,5 @@
-import math
-import random
-
-from BasicDataStruct import *
 from BasicFuncClass import *
-from typing import Tuple, List, Dict
+from typing import List
 
 
 class Node:
@@ -63,24 +59,24 @@ class MissileNode(Node):
 
 
 class ShortRangedBallisticMissile(MissileNode):
-    def __init__(self, id):
-        super().__init__(id, 1e4, 3e5, 5.0, 400, 0.5, 700, 30)
+    def __init__(self, temp_id):
+        super().__init__(temp_id, 1e4, 3e5, 5.0, 400, 0.5, 700, 30)
         self.missile_type = MissileType.SRBM
         self.K = 0.07
         self.cal_actual_damage_capability()
 
 
-class MiddleRangedBallisticMissle(MissileNode):
-    def __init__(self, id):
-        super().__init__(id, 1e5, 1e6, 3.0, 2000, 0.7, 2000, 300)
+class MiddleRangedBallisticMissile(MissileNode):
+    def __init__(self, temp_id):
+        super().__init__(temp_id, 1e5, 1e6, 3.0, 2000, 0.7, 2000, 300)
         self.missile_type = MissileType.MRBM
         self.K = 0.003
         self.cal_actual_damage_capability()
 
 
 class MiddleRangedCruiseMissile(MissileNode):
-    def __init__(self, id):
-        super().__init__(id, 5e4, 7e5, 2.0, 1000, 0.6, 600, 200)
+    def __init__(self, temp_id):
+        super().__init__(temp_id, 5e4, 7e5, 2.0, 1000, 0.6, 600, 200)
         self.missile_type = MissileType.MRCM
         self.K = 0.002
         self.cal_actual_damage_capability()
@@ -141,28 +137,28 @@ class TargetNode(Node):
 
     def __copy__(self):
         new_node = TargetNode(self.id, self.position.__copy__(), self.missile_capacity, self.size,
-                              self.price, self.threat_level, self.defense_level, self.expose_duration,self.expose_time_start)
+                              self.price, self.threat_level, self.defense_level, self.expose_duration,self.expose_time_start, self.name)
         new_node.damage_requirement = self.damage_requirement
         return new_node
 
 
 class XF_launcher(TargetNode):
-    def __init__(self, id: str, position:Position, expose_time_start:float, remain_time, name: str):
-        super().__init__(id, position, missile_capacity=16, size=3.0, price=80, threat_level=1, defense_level=1,
+    def __init__(self, temp_id: str, position:Position, expose_time_start:float, remain_time, name: str):
+        super().__init__(temp_id, position, missile_capacity=16, size=3.0, price=80, threat_level=1, defense_level=1,
                          expose_duration=remain_time, expose_time_start=expose_time_start, name=name)
         self.damage_requirement = 400.0
 
 
 class JBL_launcher(TargetNode):
-    def __init__(self, id: str, position:Position, expose_time_start:float, remain_time, name: str):
-        super().__init__(id, position, missile_capacity=8, size=6.0, price=110, threat_level=2, defense_level=2,
+    def __init__(self, temp_id: str, position:Position, expose_time_start:float, remain_time, name: str):
+        super().__init__(temp_id, position, missile_capacity=8, size=6.0, price=110, threat_level=2, defense_level=2,
                          expose_duration=remain_time, expose_time_start=expose_time_start, name=name)
         self.damage_requirement = 200.0
 
 
 class YC_launcher(TargetNode):
-    def __init__(self, id: str, position:Position, expose_time_start:float, remain_time, name: str):
-        super().__init__(id, position, missile_capacity=10, size=2.0, price=100, threat_level=3, defense_level=2,
+    def __init__(self, temp_id: str, position:Position, expose_time_start:float, remain_time, name: str):
+        super().__init__(temp_id, position, missile_capacity=10, size=2.0, price=100, threat_level=3, defense_level=2,
                          expose_duration=remain_time, expose_time_start=expose_time_start, name=name)
         self.damage_requirement = 200.0
 

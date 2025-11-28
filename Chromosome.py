@@ -1,7 +1,11 @@
-import random
+import logging
 
 from Node import *
 from typing import List, Dict
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class Chromosome:
@@ -64,7 +68,7 @@ class Chromosome:
                     missile_str += ("Launcher: " + str(temp_fire_action.red_launcher_node.id) +
                                     " Missile: " + str(temp_fire_action.red_launcher_node.missile.missile_type) +
                                     " number: " + str(temp_fire_action.assigned_missile_num) + ", ")
-            print(target_str + missile_str)
+            logging.debug(target_str + missile_str)
 
 
 class ChromosomeEvaluator:
@@ -85,7 +89,7 @@ class ChromosomeEvaluator:
             self.total_damage += target.price
 
     def print_evaluate_result(self):
-        print("总毁伤价值为： " + str(self.total_damage))
-        print("总打击代价为： " + str(self.total_cost))
-        print("总花费时间为： " + str(self.total_time))
-        print("总使用弹量为： " + str(self.total_missile_number))
+        logging.info("总毁伤价值为： " + str(self.total_damage))
+        logging.info("总打击代价为： " + str(self.total_cost))
+        logging.info("总花费时间为： " + str(self.total_time))
+        logging.info("总使用弹量为： " + str(self.total_missile_number))

@@ -218,32 +218,32 @@
                                             <div class="col-md-3">
                                                 <div class="card text-white bg-primary">
                                                     <div class="card-body text-center">
-                                                        <h5 id="totalTargets">0</h5>
-                                                        <p class="mb-0">总目标数</p>
+                                                        <h5 id="totalDamage">0</h5>
+                                                        <p class="mb-0">毁伤效能</p>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="card text-white bg-success">
                                                     <div class="card-body text-center">
-                                                        <h5 id="assignedTargets">0</h5>
-                                                        <p class="mb-0">已分配目标</p>
+                                                        <h5 id="totalCosts">0</h5>
+                                                        <p class="mb-0">兵力消耗</p>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="card text-white bg-warning">
                                                     <div class="card-body text-center">
-                                                        <h5 id="requiredResources">0</h5>
-                                                        <p class="mb-0">需用资源</p>
+                                                        <h5 id="costEffectiveness">0</h5>
+                                                        <p class="mb-0">毁伤消费比</p>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="card text-white bg-danger">
                                                     <div class="card-body text-center">
-                                                        <h5 id="successRate">0%</h5>
-                                                        <p class="mb-0">预估成功率</p>
+                                                        <h5 id="totalMissile">0%</h5>
+                                                        <p class="mb-0">消耗导弹数量</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -251,15 +251,8 @@
 
                                         <div class="table-wrapper" style="max-height: 300px;">
                                             <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>目标编号</th>
-                                                        <th>目标类型</th>
-                                                        <th>优先级</th>
-                                                        <th>分配武器</th>
-                                                        <th>预计效果</th>
-                                                        <th>执行时间</th>
-                                                    </tr>
+                                                <thead id="planTableHeader">
+                                                    <!-- 规划结果将通过JavaScript动态生成 -->
                                                 </thead>
                                                 <tbody id="planTableBody">
                                                     <!-- 规划结果将通过JavaScript动态生成 -->
@@ -336,8 +329,23 @@ $(document).ready(function() {
         $('#planStatus').removeClass('bg-warning bg-success bg-danger').addClass('bg-warning').text('计算中...');
         $('#resourceAllocation').text('计算中');
 
-        // 模拟火力规划计算（实际应调用后端API）
-        simulateFirePlanning();
+        //应调用后端API
+        $.ajax({
+            url: '/calculate',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    // 显示解析结果
+                    displayPlanTableData(response.data);
+                } else {
+                    alert('火力规划失败: ' + response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#loading').hide();
+                alert('上传失败: ' + (xhr.responseJSON?.error || error));
+            }
+        });
     });
 
     // 导出方案按钮点击事件
@@ -388,60 +396,52 @@ $(document).ready(function() {
     }
 
     // 模拟火力规划计算
-    function simulateFirePlanning() {
-        // 模拟计算延迟
-        setTimeout(function() {
-            var targetCount = $('#tableBody').children().length;
-            var successRate = Math.min(95, 70 + Math.floor(Math.random() * 25));
+    function displayPlanTableData(data) {
+        // todo
+        var targetCount = $('#tableBody').children().length;
+        var successRate = Math.min(95, 70 + Math.floor(Math.random() * 25));
 
-            // 更新状态
-            $('#planStatus').removeClass('bg-warning bg-success bg-danger').addClass('bg-success').text('已完成');
-            $('#resourceAllocation').text('已分配');
+        // 更新状态
+        $('#planStatus').removeClass('bg-warning bg-success bg-danger').addClass('bg-success').text('已完成');
+        $('#resourceAllocation').text('已分配');
 
-            // 更新概要信息
-            $('#totalTargets').text(targetCount);
-            $('#assignedTargets').text(targetCount);
-            $('#requiredResources').text(Math.ceil(targetCount * 1.2));
-            $('#successRate').text(successRate + '%');
+        // TODO: 更新优化指标信息
+        $('#totalDamage').text(targetCount);
+        $('#totalCosts').text(targetCount);
+        $('#costEffectiveness').text(Math.ceil(targetCount * 1.2));
+        $('#totalMisiile').text(successRate + '%');
 
-            // 生成规划详情表格
-            generatePlanTable(targetCount);
-
-            // 显示规划详情
-            $('#planSummary').hide();
-            $('#planDetails').show();
-
-            // 切换到火力规划标签页
-            new bootstrap.Tab(document.getElementById('fire-tab')).show();
-
-        }, 2000); // 模拟2秒计算时间
-    }
-
-    // 生成规划详情表格
-    function generatePlanTable(targetCount) {
+        // 生成规划详情表格
+        // 清空现有表格
+        $('#planTableHeader').empty();
         $('#planTableBody').empty();
 
-        var weaponTypes = ['导弹A', '导弹B', '火炮C', '无人机D'];
-        var targetTypes = ['固定目标', '移动目标', '重要目标', '普通目标'];
-        var effects = ['高毁伤', '中等毁伤', '低毁伤'];
-
-        for (var i = 1; i <= targetCount; i++) {
-            var randomWeapon = weaponTypes[Math.floor(Math.random() * weaponTypes.length)];
-            var randomType = targetTypes[Math.floor(Math.random() * targetTypes.length)];
-            var randomEffect = effects[Math.floor(Math.random() * effects.length)];
-            var priority = Math.floor(Math.random() * 5) + 1; // 1-5优先级
-            var executeTime = (Math.floor(Math.random() * 120) + 1) + '秒';
-
-            var row = $('<tr></tr>');
-            row.append('<td>T' + i.toString().padStart(3, '0') + '</td>');
-            row.append('<td>' + randomType + '</td>');
-            row.append('<td><span class="badge bg-primary">P' + priority + '</span></td>');
-            row.append('<td>' + randomWeapon + '</td>');
-            row.append('<td><span class="badge bg-success">' + randomEffect + '</span></td>');
-            row.append('<td>' + executeTime + '</td>');
-
-            $('#planTableBody').append(row);
+        // 创建表头
+        if (data.headers && data.headers.length > 0) {
+            var headerRow = $('<tr></tr>');
+            data.headers.forEach(function(header) {
+                headerRow.append('<th>' + header + '</th>');
+            });
+            $('#planTableHeader').append(headerRow);
         }
+
+        // 创建表格行
+        if (data.rows && data.rows.length > 0) {
+            data.rows.forEach(function(row, index) {
+                var tableRow = $('<tr></tr>');
+                row.forEach(function(cell) {
+                    tableRow.append('<td>' + (cell !== null && cell !== undefined ? cell : '') + '</td>');
+                });
+                $('#planTableBody').append(tableRow);
+            });
+        }
+
+        // 显示规划详情
+        $('#planSummary').hide();
+        $('#planDetails').show();
+
+        // 切换到火力规划标签页
+        new bootstrap.Tab(document.getElementById('fire-tab')).show();
     }
 
     // 初始化Bootstrap标签页组件

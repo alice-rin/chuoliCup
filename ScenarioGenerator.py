@@ -6,9 +6,17 @@ from BasicDataStruct import *
 
 
 class ScenarioGenerator:
+    _instance = None
+    blue_side_list = []
+    red_side_list = []
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(ScenarioGenerator, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
     def __init__(self):
-        self.blue_side_list = []
-        self.red_side_list = []
+        pass
 
     def createScenario(self):
         # Blue
@@ -27,7 +35,7 @@ class ScenarioGenerator:
             temp_id = xf_base_id_index + i + 1
             temp_area: Area = random.choice(area_list)
             temp_position:Position = temp_area.generate_position_within_area()
-            temp_launcher = XF_launcher(str(temp_id), temp_position, 0)
+            temp_launcher = XF_launcher(str(temp_id), temp_position, 0, 20*60, "")
             self.blue_side_list.append(temp_launcher)
 
         for i in range(8):
@@ -35,7 +43,7 @@ class ScenarioGenerator:
             temp_area: Area = random.choice(area_list)
             temp_position:Position = temp_area.generate_position_within_area()
             random_expose_time = random.uniform(0, 5 * 60)
-            temp_launcher = JBL_launcher(str(temp_id), temp_position, random_expose_time)
+            temp_launcher = JBL_launcher(str(temp_id), temp_position, random_expose_time, 15*60, "")
             self.blue_side_list.append(temp_launcher)
 
         for i in range(10):
@@ -43,7 +51,7 @@ class ScenarioGenerator:
             temp_area: Area = random.choice(area_list)
             temp_position:Position = temp_area.generate_position_within_area()
             random_expose_time = random.uniform(0, 5 * 60)
-            temp_launcher = YC_launcher(str(temp_id), temp_position, random_expose_time)
+            temp_launcher = YC_launcher(str(temp_id), temp_position, random_expose_time, 10*60, "")
             self.blue_side_list.append(temp_launcher)
 
         # Red
@@ -74,7 +82,7 @@ class ScenarioGenerator:
             temp_position:Position = temp_area.generate_position_within_area()
             temp_ready_time = random.uniform(0, 4 * 60)
             temp_red_launcher = RedStrikeVehicleNode(str(temp_id), temp_position, temp_area, temp_ready_time, 40)
-            temp_missile = MiddleRangedBallisticMissle(str(temp_id))
+            temp_missile = MiddleRangedBallisticMissile(str(temp_id))
             temp_red_launcher.setup_missile(temp_missile, 15)
             self.red_side_list.append(temp_red_launcher)
 
@@ -113,7 +121,7 @@ class ScenarioGenerator:
             match = re.search(pattern, name_str)
 
             if match:
-                model = match.group(1)  # 提取型号，对应第一个括号内内容
+                # model = match.group(1)  # 提取型号，对应第一个括号内内容
                 num1 = match.group(2)  # 提取第一个编号
                 # num2 = match.group(3)  # 提取第二个编号
 
@@ -167,7 +175,7 @@ class ScenarioGenerator:
             temp_position: Position = temp_area.generate_position_within_area()
             temp_ready_time = random.uniform(0, 4 * 60)
             temp_red_launcher = RedStrikeVehicleNode(str(temp_id), temp_position, temp_area, temp_ready_time, 40)
-            temp_missile = MiddleRangedBallisticMissle(str(temp_id))
+            temp_missile = MiddleRangedBallisticMissile(str(temp_id))
             temp_red_launcher.setup_missile(temp_missile, 15)
             self.red_side_list.append(temp_red_launcher)
 
