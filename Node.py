@@ -142,6 +142,10 @@ class TargetNode(Node):
         new_node = TargetNode(self.id, self.position.__copy__(), self.missile_capacity, self.size,
                               self.price, self.threat_level, self.defense_level, self.expose_duration,self.expose_time_start)
         new_node.damage_requirement = self.damage_requirement
+        new_node.feasible_fire_action_list.clear()
+
+
+
         return new_node
 
 
@@ -172,11 +176,13 @@ class FireAction:
         self.target_node: TargetNode = target_node
         self.red_launcher_node: RedStrikeVehicleNode = red_launcher_node
         self.assigned_missile_num = assigned_missile_num
+
         self.launch_time = launch_time
 
         self.required_damage_missile_num = 0
         self.cal_required_damage_missile_num()
 
+        # 这个变量就已经代表需要分配的弹量了
         self.required_penetration_missile_num = 0
         self.cal_required_penetration_missile_num()
 
@@ -188,6 +194,12 @@ class FireAction:
         self.node_distance = BasicGeometryFunc.cal_distance_from_to_node(self.target_node.position,
                                                                          self.red_launcher_node.position)
         self.missile_fly_duration = self.node_distance / self.red_launcher_node.missile.avg_speed
+
+
+    # 没写完
+    def __copy__(self):
+        #temp_fire_action = FireAction()
+        pass
 
     def check_feasibility_step_1(self)->bool:
         if not self.red_launcher_node.missile.shoot_range_min <= self.node_distance <= self.red_launcher_node.missile.shoot_range_max:
@@ -202,7 +214,7 @@ class FireAction:
         self.assigned_missile_num = self.required_penetration_missile_num
 
     def check_is_missile_number_required_meet(self)->bool:
-        if self.required_damage_missile_num <= self.red_launcher_node.current_missile_num:
+        if self.required_penetration_missile_num <= self.red_launcher_node.current_missile_num:
             return True
         else:
             return False
@@ -210,6 +222,8 @@ class FireAction:
     def cal_launch_time(self)->bool:
         launch_time_min = max(self.red_launcher_node.actual_ready_time, self.target_node.expose_time_start)
         if launch_time_min + self.missile_fly_duration > self.target_node.target_flee_time:
+            # for debug
+            # print("导弹编号："+ self.red_launcher_node.id +" 打击目标编号："+self.target_node.id+"不满足时间要求")
             return False
         launch_time_max = self.target_node.target_flee_time - self.missile_fly_duration
         # TODO: 现在只是随机，需要对齐齐射要求
@@ -223,6 +237,7 @@ class FireAction:
         self.required_penetration_missile_num = math.ceil(self.required_damage_missile_num / (
             self.red_launcher_node.missile.penetration_rate - self.target_node.penetration_penalty))
 
+    # 这个函数目前不用了
     def cal_feasibility(self)->bool:
         if self.check_feasibility_step_1():
             return False
@@ -238,3 +253,8 @@ class FireAction:
             return False
 
         return True
+
+
+    # 如果是发射弹量超过1枚，则需要调整
+    def adjust_position_and_time(self):
+        pass
