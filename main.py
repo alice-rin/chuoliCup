@@ -2,8 +2,8 @@ import configparser
 import time
 import os
 from flask import Flask, render_template, request, jsonify
-import pandas as pd
 
+from GA_Algorithm import *
 from Chromosome import *
 from ScenarioGenerator import *
 
@@ -91,18 +91,32 @@ def upload_file():
 def fire_planning():
     start_time = time.time()
     scenario_generator = ScenarioGenerator()
-    temp_chromosome = Chromosome(scenario_generator.red_side_list, scenario_generator.blue_side_list)
-    temp_chromosome.generate_chromosome_random()
-    temp_chromosome.print_chromosome()
+    temp_ga_algorithm = GA_Algorithm(scenario_generator, 100, 100)
+    temp_ga_algorithm.initialize_chromosome()
+    temp_ga_algorithm.loop()
 
-    temp_evaluator = ChromosomeEvaluator(temp_chromosome)
+    best_chromosome = temp_ga_algorithm.best_chromosome
+
+    temp_evaluator = temp_ga_algorithm.chromosome_evaluator
+    temp_evaluator.setupChromosome(best_chromosome)
+    temp_evaluator.evaluate()
     temp_evaluator.print_evaluate_result()
 
     end_time = time.time()
     elapsed_time = end_time - start_time
 
-    # todo:输出格式转化
-    return jsonify({'success': True, 'data': ['1','2','3']})
+    df = best_chromosome.create_plan_df()
+    data = {
+        'total_damage': temp_evaluator.total_damage,
+        'total_coat': temp_evaluator.total_cost,
+        'total_time': format(temp_evaluator.total_time, '.2f'),
+        'missile_num': temp_evaluator.total_missile_number,
+        'headers': df.columns.tolist(),
+        'rows': df.values.tolist(),
+        'total_rows': len(df),
+        'cal_time': elapsed_time
+    }
+    return jsonify({'success': True, 'data': data})
 
 if __name__ == "__main__":
     con = configparser.ConfigParser()

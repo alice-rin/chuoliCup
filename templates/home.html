@@ -219,7 +219,7 @@
                                                 <div class="card text-white bg-primary">
                                                     <div class="card-body text-center">
                                                         <h5 id="totalDamage">0</h5>
-                                                        <p class="mb-0">毁伤效能</p>
+                                                        <p class="mb-0">毁伤价值</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -227,29 +227,29 @@
                                                 <div class="card text-white bg-success">
                                                     <div class="card-body text-center">
                                                         <h5 id="totalCosts">0</h5>
-                                                        <p class="mb-0">兵力消耗</p>
+                                                        <p class="mb-0">打击代价</p>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="card text-white bg-warning">
                                                     <div class="card-body text-center">
-                                                        <h5 id="costEffectiveness">0</h5>
-                                                        <p class="mb-0">毁伤消费比</p>
+                                                        <h5 id="costEffectiveness">0s</h5>
+                                                        <p class="mb-0">任务时长</p>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="card text-white bg-danger">
                                                     <div class="card-body text-center">
-                                                        <h5 id="totalMissile">0%</h5>
-                                                        <p class="mb-0">消耗导弹数量</p>
+                                                        <h5 id="totalMissile">0枚</h5>
+                                                        <p class="mb-0">使用弹量</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="table-wrapper" style="max-height: 300px;">
+                                        <div class="table-wrapper" style="max-height: 300px; overflow: auto;">
                                             <table class="table table-bordered">
                                                 <thead id="planTableHeader">
                                                     <!-- 规划结果将通过JavaScript动态生成 -->
@@ -398,18 +398,20 @@ $(document).ready(function() {
     // 模拟火力规划计算
     function displayPlanTableData(data) {
         // todo
-        var targetCount = $('#tableBody').children().length;
-        var successRate = Math.min(95, 70 + Math.floor(Math.random() * 25));
+        var totalDamage = data.total_damage;
+        var totalCosts = data.total_coat;
+        var totalTime = data.total_time;
+        //var costEffectiveness = totalDamage / totalCosts;
+        var totalMissile = data.missile_num;
 
         // 更新状态
         $('#planStatus').removeClass('bg-warning bg-success bg-danger').addClass('bg-success').text('已完成');
         $('#resourceAllocation').text('已分配');
 
-        // TODO: 更新优化指标信息
-        $('#totalDamage').text(targetCount);
-        $('#totalCosts').text(targetCount);
-        $('#costEffectiveness').text(Math.ceil(targetCount * 1.2));
-        $('#totalMisiile').text(successRate + '%');
+        $('#totalDamage').text(totalDamage + "万元");
+        $('#totalCosts').text(totalCosts + "万元");
+        $('#costEffectiveness').text(totalTime + "秒");
+        $('#totalMissile').text(totalMissile + "枚");
 
         // 生成规划详情表格
         // 清空现有表格

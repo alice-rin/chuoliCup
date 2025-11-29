@@ -15,9 +15,9 @@ class NodeType(Enum):
 
 class MissileType(Enum):
     DEFAULT = "default"
-    SRBM = "HJD"
-    MRBM = "DDD"
-    MRCM = "XHD"
+    SRBM = "火箭弹"
+    MRBM = "弹道弹"
+    MRCM = "巡航弹"
 
 
 class Position:

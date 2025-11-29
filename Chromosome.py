@@ -1,5 +1,6 @@
 import logging
 
+import pandas as pd
 from sympy import false
 
 from Node import *
@@ -111,6 +112,28 @@ class Chromosome:
             self.unassign_attack_missile(temp_target)
             self.pick_and_assign_attack_missile_by_random(temp_target)
 
+    def create_plan_df(self):
+        data_list = []
+        columns = ['序号', '目标名称', '导弹型号', '导弹数量', '发射点经度', '发射点纬度']
+        target_cnt = 0
+        for target in self.blue_target_list:
+            target_cnt += 1
+            target_name = target.name
+            if len(target.assigned_fire_action_list) == 0:
+                temp_data = [target_cnt, target_name, "NULL", "NULL", "NULL", "NULL"]
+                data_list.append(temp_data)
+            else:
+                for temp_fire_action in target.assigned_fire_action_list:
+                    missile_type = temp_fire_action.red_launcher_node.missile.missile_type.value
+                    missile_num = temp_fire_action.assigned_missile_num
+                    longitude = format(temp_fire_action.red_launcher_node.position.longitude, '.2f')
+                    latitude = format(temp_fire_action.red_launcher_node.position.latitude, '.2f')
+                    temp_data = [target_cnt, target_name, missile_type, missile_num, longitude, latitude]
+                    data_list.append(temp_data)
+
+        dateframe = pd.DataFrame(data_list, columns=columns)
+        return dateframe
+
 
 class ChromosomeEvaluator:
 
@@ -124,6 +147,11 @@ class ChromosomeEvaluator:
         # self.evaluate()
 
     def setupChromosome(self, chromosome: Chromosome):
+        self.total_damage = 0.0
+        self.total_cost = 0.0
+        self.total_time = 0.0
+        self.total_missile_number = 0.0
+        self.score = 0.0
         self.chromosome = chromosome
 
     def evaluate(self):
