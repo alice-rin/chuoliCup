@@ -44,7 +44,7 @@ class GA_Algorithm:
                 self.chromosome_evaluator.evaluate()
                 temp_chromosome.score = self.chromosome_evaluator.score
                 temp_chromosome.is_the_best = False
-                if self.best_score < self.chromosome_evaluator.score:
+                if self.best_score <= self.chromosome_evaluator.score:
                     self.best_score = self.chromosome_evaluator.score
                     self.best_chromosome = temp_chromosome
 
@@ -59,6 +59,9 @@ class GA_Algorithm:
 
             # 然后根据染色体评分进行染色体的排序，淘汰末尾的30%，由最好的30%进行补齐
             # 这部分功能先不写了
+            # 因为染色体copy的功能写起来比较复杂，时间不够了，明天抽空再写
+
+
             print("loop number is: " + str(i) + " best score is: " + str(self.best_score))
             # 计数
             if last_best_score == self.best_score:

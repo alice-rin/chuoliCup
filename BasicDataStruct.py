@@ -1,6 +1,8 @@
 from enum import Enum
 import random
 
+from sqlalchemy.sql.operators import truediv
+
 
 class Affiliation(Enum):
     RED = "红方"
@@ -30,6 +32,11 @@ class Position:
         new_pos = Position(self.longitude, self.latitude, self.altitude)
         return new_pos
 
+    def __eq__(self, other):
+
+        if self.latitude == other.latitude and self.longitude == other.longitude and self.altitude == other.altitude:
+            return True
+        return False
 
 class Area:
     def __init__(self, lon_min: float, lon_max: float, lat_min:float, lat_max: float):

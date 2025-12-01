@@ -82,6 +82,12 @@ class Chromosome:
                 continue
             # else:
 
+    # 这个根据target.assigned_fire_action_list 生成具体的发射车位置，目前没有做打击不同目标时，发射车距离靠近的情况判断
+    # 理论上应该是统计该区域内的所用发射点位置，然后统一进行排布，检测是否与其他已具体位置的点是否距离靠近1km。但是这个逻辑有点复杂，所以不写了
+    def generate_detailed_launch_pos(self):
+        for target in self.blue_target_list:
+            for temp_fire_action in target.assigned_fire_action_list:
+                temp_fire_action.adjust_position_and_time()
 
 
     def print_chromosome(self):
@@ -130,6 +136,9 @@ class Chromosome:
                     latitude = format(temp_fire_action.red_launcher_node.position.latitude, '.2f')
                     temp_data = [target_cnt, target_name, missile_type, missile_num, longitude, latitude]
                     data_list.append(temp_data)
+                    # todo: 需要根据target.assigned_fire_action_list.detailed_launch_pos_list 和 detailed_launch_time来重新生成发射位置和时间
+                    # 今天写到快4点了。。就是，我可能来不及在汇报之前回去了。。真的不好意思。。。 T.T
+
 
         dateframe = pd.DataFrame(data_list, columns=columns)
         return dateframe
