@@ -1,6 +1,6 @@
 from BasicDataStruct import *
 import math
-from typing import List, Dict
+from typing import List
 
 class BasicGeometryFunc:
     @staticmethod

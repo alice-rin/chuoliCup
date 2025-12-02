@@ -1,8 +1,6 @@
-from Chromosome import *
-from ScenarioGenerator import *
 import time
-from GA_Algorithm import *
 
+from GA_Algorithm import *
 
 if __name__ == "__main__":
 

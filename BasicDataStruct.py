@@ -1,8 +1,6 @@
 from enum import Enum
 import random
 
-from sqlalchemy.sql.operators import truediv
-
 
 class Affiliation(Enum):
     RED = "红方"

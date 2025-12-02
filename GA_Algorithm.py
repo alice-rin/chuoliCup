@@ -1,5 +1,3 @@
-from sqlalchemy.sql.operators import truediv
-
 from Chromosome import *
 from ScenarioGenerator import *
 
