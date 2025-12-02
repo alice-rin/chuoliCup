@@ -175,7 +175,8 @@ class FireAction:
         self.assigned_missile_num = assigned_missile_num
 
         self.launch_time = launch_time
-
+        self.launch_time_min = launch_time
+        self.launch_time_max = launch_time
         self.required_damage_missile_num = 0
         self.cal_required_damage_missile_num()
 
@@ -192,6 +193,9 @@ class FireAction:
                                                                          self.red_launcher_node.position)
         self.missile_fly_duration = self.node_distance / self.red_launcher_node.missile.avg_speed
 
+        # 补充详细信息
+        self.detailed_launch_pos_list:List[Position] = []
+        self.detailed_launch_time:List[float] = []
 
     # 没写完
     def __copy__(self):
@@ -217,14 +221,14 @@ class FireAction:
             return False
 
     def cal_launch_time(self)->bool:
-        launch_time_min = max(self.red_launcher_node.actual_ready_time, self.target_node.expose_time_start)
-        if launch_time_min + self.missile_fly_duration > self.target_node.target_flee_time:
+        self.launch_time_min = max(self.red_launcher_node.actual_ready_time, self.target_node.expose_time_start)
+        if self.launch_time_min + self.missile_fly_duration > self.target_node.target_flee_time:
             # for debug
             # print("导弹编号："+ self.red_launcher_node.id +" 打击目标编号："+self.target_node.id+"不满足时间要求")
             return False
-        launch_time_max = self.target_node.target_flee_time - self.missile_fly_duration
+        self.launch_time_max = self.target_node.target_flee_time - self.missile_fly_duration
         # TODO: 现在只是随机，需要对齐齐射要求
-        self.launch_time = random.uniform(launch_time_min, launch_time_max)
+        self.launch_time = random.uniform(self.launch_time_min, self.launch_time_max)
         return True
 
     def cal_required_damage_missile_num(self):
@@ -254,4 +258,53 @@ class FireAction:
 
     # 如果是发射弹量超过1枚，则需要调整
     def adjust_position_and_time(self):
-        pass
+        self.detailed_launch_pos_list.clear()
+        self.detailed_launch_time.clear()
+
+        # 起始点是距离目标点最近的位置，然后先向该点与目标点连线垂直方向左右各试一次能否成功部署，如果不行，那么向后方部署
+        temp_pos = self.red_launcher_node.position
+        loop_num = 50
+        loop_iter = 0
+        last_launch_time = self.launch_time
+        while len(self.detailed_launch_pos_list) < self.assigned_missile_num and loop_iter < loop_num:
+            loop_iter += 1
+            temp_pos_bearing = BasicGeometryFunc.calculate_bearing_from_A_to_B(self.target_node.position, temp_pos)
+            temp_pos_left_bearing = temp_pos_bearing + 90.0
+            temp_pos_right_bearing = temp_pos_bearing - 90.0
+
+            temp_pos_left = BasicGeometryFunc.calculate_destination_haversine(temp_pos, temp_pos_left_bearing, 1001.0)
+            temp_pos_up = BasicGeometryFunc.calculate_destination_haversine(temp_pos, temp_pos_bearing - 180.0, 1001.0)
+            temp_pos_right = BasicGeometryFunc.calculate_destination_haversine(temp_pos, temp_pos_right_bearing, 1001.0)
+            if BasicGeometryFunc.point_in_polygon_ray_casting(temp_pos_left, self.red_launcher_node.area.generate_area_pos_list()):
+                self.detailed_launch_pos_list.append(temp_pos_left)
+                self.detailed_launch_time.append(last_launch_time)
+                temp_pos = temp_pos_left
+                continue
+
+            if BasicGeometryFunc.point_in_polygon_ray_casting(temp_pos_right, self.red_launcher_node.area.generate_area_pos_list()):
+                self.detailed_launch_pos_list.append(temp_pos_left)
+                self.detailed_launch_time.append(last_launch_time)
+                temp_pos = temp_pos_left
+                continue
+
+            if BasicGeometryFunc.point_in_polygon_ray_casting(temp_pos_up, self.red_launcher_node.area.generate_area_pos_list()):
+                self.detailed_launch_pos_list.append(temp_pos_up)
+                self.detailed_launch_time.append(last_launch_time - 1001 / self.red_launcher_node.missile.avg_speed) # 希望不会早于最早时间
+                last_launch_time = last_launch_time - 1001 / self.red_launcher_node.missile.avg_speed
+
+                temp_pos = temp_pos_up
+                continue
+
+
+
+
+        # 这里再对超过最早打击时间这个情况进行修正
+        actual_min_launch_time_before_fix = min(self.detailed_launch_time)
+
+        if actual_min_launch_time_before_fix < self.launch_time_min:
+            temp_time_to_add = self.launch_time_min - actual_min_launch_time_before_fix
+
+            for i in range(len(self.detailed_launch_time)):
+                self.detailed_launch_time[i] += temp_time_to_add
+
+        # 这里就不检测加完时间之后是不是超过最大时间了。 Hia~
