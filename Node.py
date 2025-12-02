@@ -265,6 +265,7 @@ class FireAction:
         temp_pos = self.red_launcher_node.position
         loop_num = 50
         loop_iter = 0
+        last_launch_time = self.launch_time
         while len(self.detailed_launch_pos_list) < self.assigned_missile_num and loop_iter < loop_num:
             loop_iter += 1
             temp_pos_bearing = BasicGeometryFunc.calculate_bearing_from_A_to_B(self.target_node.position, temp_pos)
@@ -276,20 +277,21 @@ class FireAction:
             temp_pos_right = BasicGeometryFunc.calculate_destination_haversine(temp_pos, temp_pos_right_bearing, 1001.0)
             if BasicGeometryFunc.point_in_polygon_ray_casting(temp_pos_left, self.red_launcher_node.area.generate_area_pos_list()):
                 self.detailed_launch_pos_list.append(temp_pos_left)
-                self.detailed_launch_time.append(self.launch_time)
+                self.detailed_launch_time.append(last_launch_time)
                 temp_pos = temp_pos_left
                 continue
 
             if BasicGeometryFunc.point_in_polygon_ray_casting(temp_pos_right, self.red_launcher_node.area.generate_area_pos_list()):
                 self.detailed_launch_pos_list.append(temp_pos_left)
-                self.detailed_launch_time.append(self.launch_time)
+                self.detailed_launch_time.append(last_launch_time)
                 temp_pos = temp_pos_left
                 continue
 
             if BasicGeometryFunc.point_in_polygon_ray_casting(temp_pos_up, self.red_launcher_node.area.generate_area_pos_list()):
                 self.detailed_launch_pos_list.append(temp_pos_up)
-                self.detailed_launch_time.append(self.launch_time - 1001 / self.red_launcher_node.missile.avg_speed) # 希望不会早于最早时间
-                # 如果左右都行，那么就选择右边的点作为下一个循环的起点
+                self.detailed_launch_time.append(last_launch_time - 1001 / self.red_launcher_node.missile.avg_speed) # 希望不会早于最早时间
+                last_launch_time = last_launch_time - 1001 / self.red_launcher_node.missile.avg_speed
+
                 temp_pos = temp_pos_up
                 continue
 
