@@ -2,8 +2,14 @@ from Chromosome import *
 from ScenarioGenerator import *
 
 class GA_Algorithm:
+    _instance = None
 
-    def __init__(self, temp_scenario_generator:ScenarioGenerator, chromosome_num:int, iter_num:int):
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(GA_Algorithm, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
+    def setup(self, temp_scenario_generator:ScenarioGenerator, chromosome_num:int, iter_num:int):
 
         self.red_side_list:List[RedStrikeVehicleNode] = temp_scenario_generator.red_side_list
         self.blue_side_list:List[TargetNode] = temp_scenario_generator.blue_side_list

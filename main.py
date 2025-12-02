@@ -1,13 +1,16 @@
 import configparser
+import io
 import time
 import os
+from urllib.parse import quote
+
 from flask import Flask, render_template, request, jsonify, Response
 from datetime import datetime
 
 from GA_Algorithm import *
 from ScenarioGenerator import *
 
-app = Flask(__name__)
+app =  Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -91,7 +94,8 @@ def upload_file():
 def fire_planning():
     start_time = time.time()
     scenario_generator = ScenarioGenerator()
-    temp_ga_algorithm = GA_Algorithm(scenario_generator, 100, 100)
+    temp_ga_algorithm = GA_Algorithm()
+    temp_ga_algorithm.setup(scenario_generator, 100, 100)
     temp_ga_algorithm.initialize_chromosome()
     temp_ga_algorithm.loop()
 
@@ -121,32 +125,32 @@ def fire_planning():
 @app.route('/export', methods=['GET'])
 def export_csv():
     """导出CSV文件接口"""
-    plan_data = []
+    plan_data = None
     try:
-        # 检查是否有可导出的计算结果
-        if not plan_data:
+        ga_algorithm = GA_Algorithm()
+        best_chromosome = ga_algorithm.best_chromosome
+        plan_data = best_chromosome.create_plan_df()
+
+        if plan_data is None or plan_data.empty:
             return jsonify({
                 'success': False,
                 'message': '没有可导出的计算结果，请先完成计算'
             }), 400
 
-        # 生成CSV数据
-        csv_data = []
-
-        if not csv_data:
-            return jsonify({
-                'success': False,
-                'message': '生成CSV数据失败'
-            }), 500
+        output = io.StringIO()
+        plan_data.to_csv(output, index=False, encoding='utf-8')
+        csv_data = output.getvalue()
+        output.close()
 
         # 创建响应对象
         response = Response(
             csv_data,
-            mimetype='text/csv',
-            headers={
-                'Content-Disposition': f'attachment; filename=火力规划方案_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
-            }
+            mimetype='text/csv; charset=utf-8',
         )
+        filename = "火力规划方案_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".csv"
+        encoded_filename = quote(filename, safe='')  # 对文件名进行URL编码
+        rfc5987_filename = f"UTF-8''{encoded_filename}"
+        response.headers['Content-Disposition'] = f"attachment; filename*=utf-8''{rfc5987_filename}"
 
         return response
 

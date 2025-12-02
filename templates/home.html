@@ -362,7 +362,7 @@ $(document).ready(function() {
         $('#exportPlanBtn').prop('disabled', true);
 
         // 发起导出请求
-        fetch('/api/export', {
+        fetch('/export', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

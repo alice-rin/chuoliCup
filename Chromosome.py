@@ -140,8 +140,8 @@ class Chromosome:
                     # 今天写到快4点了。。就是，我可能来不及在汇报之前回去了。。真的不好意思。。。 T.T
 
 
-        dateframe = pd.DataFrame(data_list, columns=columns)
-        return dateframe
+        dataframe = pd.DataFrame(data_list, columns=columns)
+        return dataframe
 
 
 class ChromosomeEvaluator:
