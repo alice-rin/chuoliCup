@@ -1,10 +1,10 @@
 import configparser
 import time
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
+from datetime import datetime
 
 from GA_Algorithm import *
-from Chromosome import *
 from ScenarioGenerator import *
 
 app = Flask(__name__)
@@ -117,6 +117,44 @@ def fire_planning():
         'cal_time': elapsed_time
     }
     return jsonify({'success': True, 'data': data})
+
+@app.route('/export', methods=['GET'])
+def export_csv():
+    """导出CSV文件接口"""
+    plan_data = []
+    try:
+        # 检查是否有可导出的计算结果
+        if not plan_data:
+            return jsonify({
+                'success': False,
+                'message': '没有可导出的计算结果，请先完成计算'
+            }), 400
+
+        # 生成CSV数据
+        csv_data = []
+
+        if not csv_data:
+            return jsonify({
+                'success': False,
+                'message': '生成CSV数据失败'
+            }), 500
+
+        # 创建响应对象
+        response = Response(
+            csv_data,
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': f'attachment; filename=火力规划方案_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+            }
+        )
+
+        return response
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'导出失败: {str(e)}'
+        }), 500
 
 if __name__ == "__main__":
     con = configparser.ConfigParser()

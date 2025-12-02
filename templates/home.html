@@ -351,10 +351,54 @@ $(document).ready(function() {
     // 导出方案按钮点击事件
     $('#exportPlanBtn').on('click', function() {
         if ($('#planDetails').is(':visible')) {
-            alert('导出功能开发中...');
+
         } else {
             alert('请先完成火力规划计算！');
+            return;
         }
+        // 显示加载状态
+        const originalHtml = $('#exportPlanBtn').html();
+        $('#exportPlanBtn').html('<i class="fas fa-spinner fa-spin"></i> 导出中...');
+        $('#exportPlanBtn').prop('disabled', true);
+
+        // 发起导出请求
+        fetch('/api/export', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络响应不正常');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // 创建下载链接
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `火力规划方案_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+
+            // 清理资源
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            // 显示成功消息
+            alert('方案导出成功！');
+        })
+        .catch(error => {
+            console.error('导出失败:', error);
+            alert('导出失败，请重试。');
+        })
+        .finally(() => {
+            // 恢复按钮状态
+            $('#exportPlanBtn').html(originalHtml);
+            $('#exportPlanBtn').prop('disabled', false);
+        });
     });
 
     // 显示表格数据的函数
