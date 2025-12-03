@@ -120,7 +120,7 @@ class Chromosome:
 
     def create_plan_df(self):
         data_list = []
-        columns = ['序号', '目标名称', '导弹型号', '导弹数量', '发射点经度', '发射点纬度']
+        columns = ['序号', '目标名称', '发射区域', '导弹数量', '发射点经度', '发射点纬度']
         target_cnt = 0
         for target in self.blue_target_list:
             target_cnt += 1
@@ -130,15 +130,37 @@ class Chromosome:
                 data_list.append(temp_data)
             else:
                 for temp_fire_action in target.assigned_fire_action_list:
+                    area = temp_fire_action.red_launcher_node.area.name
                     missile_type = temp_fire_action.red_launcher_node.missile.missile_type.value
                     missile_num = temp_fire_action.assigned_missile_num
                     longitude = format(temp_fire_action.red_launcher_node.position.longitude, '.2f')
                     latitude = format(temp_fire_action.red_launcher_node.position.latitude, '.2f')
-                    temp_data = [target_cnt, target_name, missile_type, missile_num, longitude, latitude]
+                    temp_data = [target_cnt, target_name, area, missile_num, longitude, latitude]
                     data_list.append(temp_data)
                     # todo: 需要根据target.assigned_fire_action_list.detailed_launch_pos_list 和 detailed_launch_time来重新生成发射位置和时间
                     # 今天写到快4点了。。就是，我可能来不及在汇报之前回去了。。真的不好意思。。。 T.T
 
+        dataframe = pd.DataFrame(data_list, columns=columns)
+        return dataframe
+
+    def create_output_df(self):
+        data_list = []
+        columns = ['区域ID', '发射点代号', '打击目标名称ID', '发射时间', '发射点经度', '发射点纬度']
+        for target in self.blue_target_list:
+            target_name = target.name
+            if len(target.assigned_fire_action_list) == 0:
+                temp_data = ["NULL", "NULL", target_name, "NULL", "NULL", "NULL"]
+                data_list.append(temp_data)
+            else:
+                for temp_fire_action in target.assigned_fire_action_list:
+                    area = temp_fire_action.red_launcher_node.area.name
+                    missile_num = temp_fire_action.assigned_missile_num
+                    for i in range(missile_num):
+                        longitude = format(temp_fire_action.detailed_launch_pos_list[i].longitude, '.6f')
+                        latitude = format(temp_fire_action.detailed_launch_pos_list[i].latitude, '.6f')
+                        fire_time = temp_fire_action.detailed_launch_time[i]
+                        temp_data = [area, "", target_name, fire_time, longitude, latitude]
+                        data_list.append(temp_data)
 
         dataframe = pd.DataFrame(data_list, columns=columns)
         return dataframe

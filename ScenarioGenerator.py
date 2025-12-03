@@ -178,6 +178,7 @@ class ScenarioGenerator:
         for i in range(4):
             temp_id = ballistic_base_id_index + i + 1
             temp_area: Area = area_ballistic_list[i]
+            temp_area.set_name("区域" + str(1+i))
             temp_position: Position = temp_area.generate_position_within_area()
             temp_ready_time = random.uniform(0, 4 * 60)
             temp_red_launcher = RedStrikeVehicleNode(str(temp_id), temp_position, temp_area, temp_ready_time, 40)
@@ -188,6 +189,7 @@ class ScenarioGenerator:
         for i in range(4):
             temp_id = cruise_base_id_index + i + 1
             temp_area: Area = area_cruise_list[i]
+            temp_area.set_name("区域"+str(5+i))
             temp_position: Position = temp_area.generate_position_within_area()
             temp_ready_time = random.uniform(0, 4 * 60)
             temp_red_launcher = RedStrikeVehicleNode(str(temp_id), temp_position, temp_area, temp_ready_time, 20)
@@ -198,6 +200,7 @@ class ScenarioGenerator:
         for i in range(3):
             temp_id = SRBM_base_id_index + i + 1
             temp_area: Area = area_SRBM_list[i]
+            temp_area.set_name("区域" + str(9+i))
             temp_position: Position = temp_area.generate_position_within_area()
             temp_ready_time = random.uniform(0, 4 * 60)
             temp_red_launcher = RedStrikeVehicleNode(str(temp_id), temp_position, temp_area, temp_ready_time, 10)

@@ -2,18 +2,43 @@ import configparser
 import io
 import time
 import os
+import sys
 from urllib.parse import quote
-
 from flask import Flask, render_template, request, jsonify, Response
 from datetime import datetime
+
+# 添加当前目录到Python路径
+if getattr(sys, 'frozen', False):
+    # 打包后的exe文件所在目录
+    base_path = os.path.dirname(sys.executable)
+    sys.path.insert(0, base_path)
+else:
+    # 脚本文件所在目录
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, base_path)
 
 from GA_Algorithm import *
 from ScenarioGenerator import *
 
-app =  Flask(__name__)
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# 获取资源路径的辅助函数
+def get_resource_path(relative_path):
+    """获取资源的绝对路径，适用于打包后的exe"""
+    base_path = None
+    if getattr(sys, 'frozen', False):
+        # exe文件所在目录
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # 脚本文件所在目录
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
+
+# 创建Flask应用，设置正确的模板和静态文件路径
+template_dir = get_resource_path('templates')
+upload_dir = get_resource_path('uploads')
+
+app = Flask(__name__, template_folder=template_dir)
+app.config['UPLOAD_FOLDER'] = upload_dir
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
 def parse_txt_to_dataframe(file_path):
@@ -100,6 +125,7 @@ def fire_planning():
     temp_ga_algorithm.loop()
 
     best_chromosome = temp_ga_algorithm.best_chromosome
+    best_chromosome.generate_detailed_launch_pos()
 
     temp_evaluator = temp_ga_algorithm.chromosome_evaluator
     temp_evaluator.setupChromosome(best_chromosome)
@@ -129,7 +155,7 @@ def export_csv():
     try:
         ga_algorithm = GA_Algorithm()
         best_chromosome = ga_algorithm.best_chromosome
-        plan_data = best_chromosome.create_plan_df()
+        plan_data = best_chromosome.create_output_df()
 
         if plan_data is None or plan_data.empty:
             return jsonify({
@@ -162,10 +188,21 @@ def export_csv():
 
 if __name__ == "__main__":
     con = configparser.ConfigParser()
-    con.read("./config.ini", encoding="utf-8")
+    if getattr(sys, 'frozen', False):
+        # exe文件所在目录
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # 脚本文件所在目录
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(base_path, 'config.ini')
+    con.read(config_path, encoding='utf-8')
 
     host_session = con.items("host")
     host_session_dict = dict(host_session)
     host_url = host_session_dict["host_url"]
     port = int(host_session_dict["port"])
-    app.run(port=port, host=host_url, debug=True)
+    app.run(port=port, host=host_url, debug=False)
+
+    print(f"启动火力规划系统...")
+    print(f"服务地址: http://{host_url}:{port}")
+    print("按 Ctrl+C 停止服务")

@@ -38,12 +38,16 @@ class Position:
 
 class Area:
     def __init__(self, lon_min: float, lon_max: float, lat_min:float, lat_max: float):
+        self.name = ""
         self.lon_min = lon_min
         self.lon_max = lon_max
         self.lat_min = lat_min
         self.lat_max = lat_max
 
         self.center_pos:Position = Position((self.lon_min+ self.lon_max) / 2.0, (self.lat_min + self.lat_max) / 2.0, 0.0)
+
+    def set_name(self, name: str):
+        self.name = name
 
     def generate_position_within_area(self):
         lon_random = random.uniform(self.lon_min, self.lon_max)
