@@ -203,7 +203,7 @@ class FireAction:
         pass
 
     def check_feasibility_step_1(self)->bool:
-        if not self.red_launcher_node.missile.shoot_range_min <= self.node_distance <= self.red_launcher_node.missile.shoot_range_max:
+        if not (self.red_launcher_node.missile.shoot_range_min <= self.node_distance <= self.red_launcher_node.missile.shoot_range_max):
             return False
 
         if self.target_node.size < (self.red_launcher_node.missile.precision - 1e-6):
@@ -254,8 +254,26 @@ class FireAction:
             return False
 
         return True
+    # step 就是一公里
+    def find_absolute_feasible_pos_by_distance(self, temp_pos, step = 1.01e3):
+        found_new_pos = False
+        area_center = self.red_launcher_node.area.center_pos
+        current_step = step
+        temp_pos_bearing = BasicGeometryFunc.calculate_bearing_from_A_to_B(area_center, temp_pos)
+        loop_count = 0
+        loop_num = 100
+        while not found_new_pos and loop_count < loop_num:
+            # debug
+            print("loop iter number is: " + str(loop_count+1))
+            new_pos = BasicGeometryFunc.calculate_destination_haversine(temp_pos, temp_pos_bearing, current_step)
+            if BasicGeometryFunc.point_in_polygon_ray_casting(new_pos, self.red_launcher_node.area.generate_area_pos_list()):
+                # debug
+                print("Get new position")
+                return new_pos
+            current_step += step
+            loop_count += 1
 
-
+        return Position(0.0, 0.0, 0.0)
     # 如果是发射弹量超过1枚，则需要调整
     def adjust_position_and_time(self):
         self.detailed_launch_pos_list.clear()
@@ -295,8 +313,17 @@ class FireAction:
                 temp_pos = temp_pos_up
                 continue
 
+            # 如果都没有的话，就需要找到一个可行的点了
+            # 如果没有的话，就从区域的中心点连线至当前的发射位置temp_pos,然后选一个点，直到在区域内
+            temp_pos_new = self.find_absolute_feasible_pos_by_distance(temp_pos)
+            self.detailed_launch_pos_list.append(temp_pos_new)
+            distance_last = temp_pos - self.target_node.position
+            distance_new = temp_pos_new - self.target_node.position
 
-
+            self.detailed_launch_time.append(
+                last_launch_time - (distance_new - distance_last) / self.red_launcher_node.missile.avg_speed)  # 希望不会早于最早时间
+            last_launch_time = last_launch_time - (distance_new - distance_last) / self.red_launcher_node.missile.avg_speed
+            temp_pos = temp_pos_new
 
         # 这里再对超过最早打击时间这个情况进行修正
         actual_min_launch_time_before_fix = min(self.detailed_launch_time)

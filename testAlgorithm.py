@@ -43,7 +43,8 @@ if __name__ == "__main__":
     #  temp_evaluator.print_evaluate_result()
 
     # 新增变异的逻辑
-    temp_ga_algorithm = GA_Algorithm(temp_scenario_generator, 100, 100)
+    temp_ga_algorithm = GA_Algorithm()
+    temp_ga_algorithm.setup(temp_scenario_generator, 100, 100)
     temp_ga_algorithm.initialize_chromosome()
     temp_ga_algorithm.loop()
 

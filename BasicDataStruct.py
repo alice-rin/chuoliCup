@@ -1,6 +1,6 @@
 from enum import Enum
 import random
-
+import math
 
 class Affiliation(Enum):
     RED = "红方"
@@ -35,6 +35,22 @@ class Position:
         if self.latitude == other.latitude and self.longitude == other.longitude and self.altitude == other.altitude:
             return True
         return False
+
+    def __sub__(self, other):
+        lat1_rad = math.radians(self.latitude)
+        lon1_rad = math.radians(self.longitude)
+        lat2_rad = math.radians(other.latitude)
+        lon2_rad = math.radians(other.longitude)
+
+        dlat = lat2_rad - lat1_rad
+        dlon = lon2_rad - lon1_rad
+
+        # Haversine
+        a = math.sin(dlat / 2) ** 2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2) ** 2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+        R = 6371.0 * 1e3
+        return R * c
 
 class Area:
     def __init__(self, lon_min: float, lon_max: float, lat_min:float, lat_max: float):
