@@ -131,16 +131,6 @@ class ScenarioGenerator:
                 num1 = match.group(2)  # 提取第一个编号
                 # num2 = match.group(3)  # 提取第二个编号
 
-            if "XF" in row['目标名称']:
-                xf_base_id_index += 1
-                temp_id = xf_base_id_index
-            if "JBL" in row['目标名称']:
-                jbl_base_id_index += 1
-                temp_id = jbl_base_id_index
-            if "YC" in row['目标名称']:
-                yc_base_id_index += 1
-                temp_id = yc_base_id_index
-
             if num1 == '1':
                 start_time = 0
             if num1 == '2':
@@ -149,7 +139,20 @@ class ScenarioGenerator:
                 start_time = 10
             temp_position: Position = Position(row['经度'], row['纬度'], 0)
             remain_time = row['剩余时间'] * 60
-            temp_launcher = XF_launcher(str(temp_id), temp_position, start_time, remain_time, row['目标名称'])
+
+            temp_launcher = None
+            if "XF" in row['目标名称']:
+                xf_base_id_index += 1
+                temp_id = xf_base_id_index
+                temp_launcher = XF_launcher(str(temp_id), temp_position, start_time, remain_time, row['目标名称'])
+            if "JBL" in row['目标名称']:
+                jbl_base_id_index += 1
+                temp_id = jbl_base_id_index
+                temp_launcher = JBL_launcher(str(temp_id), temp_position, start_time, remain_time, row['目标名称'])
+            if "YC" in row['目标名称']:
+                yc_base_id_index += 1
+                temp_id = yc_base_id_index
+                temp_launcher = YC_launcher(str(temp_id), temp_position, start_time, remain_time, row['目标名称'])
 
             self.blue_side_list.append(temp_launcher)
 
